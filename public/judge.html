@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ru">
 <head>
@@ -59,6 +60,10 @@ select {
   color: white;
 }
 
+.nav button:disabled {
+  opacity: 0.4;
+}
+
 .counter {
   font-size: 12px;
   color: #aab7cc;
@@ -117,6 +122,11 @@ select {
   font-weight: 750;
   font-size: 18px;
   padding: 15px;
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
 
 .status {
@@ -211,7 +221,14 @@ function clearInput() {
 }
 
 function update() {
-  if (!gymnasts.length) return;
+  if (!gymnasts.length) {
+    $("counter").textContent = "Список выступлений пуст";
+    $("gymnastName").textContent = "Нет выступлений";
+    $("stage").textContent = "";
+    $("gymnastClub").textContent = "";
+    currentGymnastId = null;
+    return;
+  }
 
   currentIndex = Math.max(
     0,
@@ -238,6 +255,9 @@ function update() {
 
   $("warning").hidden =
     currentIndex === secretaryIndex;
+
+  $("prev").disabled = currentIndex === 0;
+  $("next").disabled = currentIndex === gymnasts.length - 1;
 }
 
 socket.on("connect", () => {
@@ -258,6 +278,8 @@ socket.on("init_data", data => {
 });
 
 socket.on("gymnast_changed", data => {
+  // Если секретарь выбрал другое выступление,
+  // судья тоже переходит к нему.
   secretaryIndex = data.currentIndex;
   currentIndex = data.currentIndex;
 
@@ -286,6 +308,8 @@ $("backspace").onclick = () => {
   showInput();
 };
 
+// Ручное переключение теперь локальное:
+// оно не меняет выступление секретаря и других судей.
 function move(delta) {
   const nextIndex = currentIndex + delta;
 
@@ -297,8 +321,6 @@ function move(delta) {
 
   clearInput();
   update();
-
-  socket.emit("set_gymnast_index", currentIndex);
 }
 
 $("prev").onclick = () => move(-1);
@@ -320,13 +342,17 @@ $("submit").onclick = () => {
     return;
   }
 
+  // Запоминаем выступление, для которого отправляется оценка.
+  const submittedGymnastId = currentGymnastId;
+  const submittedIndex = currentIndex;
+
   $("submit").disabled = true;
   $("status").textContent = "Сохранение…";
 
   socket.timeout(8000).emit(
     "submit_score",
     {
-      gymnastId: currentGymnastId,
+      gymnastId: submittedGymnastId,
       judgeRole: $("judgeRole").value,
       score
     },
@@ -335,7 +361,7 @@ $("submit").onclick = () => {
 
       if (error) {
         $("status").textContent =
-          "Нет подтверждения от сервера.";
+          "Нет подтверждения от сервера. Проверьте соединение.";
         return;
       }
 
@@ -345,10 +371,30 @@ $("submit").onclick = () => {
         return;
       }
 
-      $("status").textContent =
-        `Оценка ${response.score} сохранена.`;
-
       clearInput();
+
+      // Автоматически переходим дальше только после
+      // подтверждения успешного сохранения сервером.
+      // Если судья успел вручную переключиться,
+      // не меняем его текущую позицию.
+      if (
+        currentGymnastId === submittedGymnastId &&
+        currentIndex === submittedIndex
+      ) {
+        if (currentIndex < gymnasts.length - 1) {
+          currentIndex++;
+          update();
+
+          $("status").textContent =
+            `Оценка ${response.score} сохранена. Следующая гимнастка.`;
+        } else {
+          $("status").textContent =
+            `Оценка ${response.score} сохранена. Это последнее выступление.`;
+        }
+      } else {
+        $("status").textContent =
+          `Оценка ${response.score} сохранена.`;
+      }
     }
   );
 };
@@ -356,3 +402,4 @@ $("submit").onclick = () => {
 
 </body>
 </html>
+
