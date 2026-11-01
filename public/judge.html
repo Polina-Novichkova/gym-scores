@@ -11,11 +11,13 @@
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  color: #293650;
-  background: #f5f4f8;
+  color: #514342;
+  background: #faf6f3;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -24,24 +26,24 @@ body {
   place-items: center;
   padding: 24px 14px;
   background:
-    radial-gradient(circle at 12% 8%, rgba(201,187,235,.34), transparent 26rem),
-    radial-gradient(circle at 90% 90%, rgba(245,207,219,.35), transparent 25rem),
-    #f5f4f8;
+    radial-gradient(circle at 12% 8%, rgba(232,195,187,.32), transparent 26rem),
+    radial-gradient(circle at 90% 90%, rgba(244,220,211,.42), transparent 25rem),
+    #faf6f3;
 }
 
 .card {
   width: min(100%, 500px);
-  background: rgba(255,255,255,.96);
-  border: 1px solid #e7e2ef;
+  background: rgba(255,253,251,.97);
+  border: 1px solid #eee2dc;
   border-radius: 24px;
   padding: clamp(19px, 4vw, 28px);
-  box-shadow: 0 18px 55px rgba(48,43,76,.10);
+  box-shadow: 0 18px 55px rgba(105,75,67,.09);
 }
 
 .card::before {
   content: "GYM SCORES  /  JUDGE PANEL";
   display: block;
-  color: #9584bd;
+  color: #bd8e83;
   font-size: 10px;
   font-weight: 850;
   letter-spacing: 1.7px;
@@ -50,7 +52,7 @@ body {
 
 label {
   display: block;
-  color: #77758b;
+  color: #927e79;
   font-size: 12px;
   font-weight: 750;
 }
@@ -63,17 +65,17 @@ select, button {
 
 select {
   width: 100%;
-  background: #f7f5fb;
-  color: #293650;
-  border: 1px solid #e4dfed;
+  background: #fbf5f2;
+  color: #514342;
+  border: 1px solid #eadbd5;
   margin: 8px 0 17px;
   padding: 13px 14px;
   outline: none;
 }
 
 select:focus {
-  border-color: #9a87c9;
-  box-shadow: 0 0 0 3px rgba(154,135,201,.15);
+  border-color: #c7978c;
+  box-shadow: 0 0 0 3px rgba(199,151,140,.15);
 }
 
 .nav {
@@ -84,20 +86,26 @@ select:focus {
 }
 
 .nav button {
-  background: #eeeaf6;
-  color: #625486;
+  background: #f4e8e3;
+  color: #986f65;
   padding: 11px 14px;
   font-weight: 750;
   cursor: pointer;
   transition: .15s;
 }
 
-.nav button:hover:not(:disabled) { background: #e4def0; }
-.nav button:disabled { opacity: .38; cursor: not-allowed; }
+.nav button:hover:not(:disabled) {
+  background: #ecd9d2;
+}
+
+.nav button:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+}
 
 .counter {
   font-size: 11px;
-  color: #89869a;
+  color: #a08e88;
   text-align: center;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -109,8 +117,8 @@ select:focus {
   margin-top: 23px;
   padding: 7px 11px;
   border-radius: 999px;
-  background: #f1edf8;
-  color: #806cae;
+  background: #f6e9e5;
+  color: #ae7d72;
   font-size: 13px;
   font-weight: 850;
 }
@@ -119,22 +127,22 @@ select:focus {
   font-size: clamp(23px, 5vw, 29px);
   line-height: 1.2;
   font-weight: 850;
-  color: #293650;
+  color: #514342;
   margin: 12px 0 6px;
   letter-spacing: -.5px;
 }
 
 .club {
-  color: #85869a;
+  color: #a08e88;
   min-height: 22px;
   font-size: 13px;
   line-height: 1.55;
 }
 
 .warning {
-  color: #946b29;
-  background: #fff7e8;
-  border: 1px solid #f4e2bd;
+  color: #a36f50;
+  background: #fff4e9;
+  border: 1px solid #f0d9c5;
   border-radius: 10px;
   font-size: 12px;
   padding: 9px 11px;
@@ -142,8 +150,8 @@ select:focus {
 }
 
 .display {
-  background: #f8f7fb;
-  border: 1px solid #e6e1ef;
+  background: #fbf5f2;
+  border: 1px solid #eee0da;
   border-radius: 16px;
   text-align: right;
   padding: 13px 18px;
@@ -151,7 +159,7 @@ select:focus {
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: -1px;
-  color: #5f9c8a;
+  color: #bd8e83;
   margin: 20px 0 14px;
   font-variant-numeric: tabular-nums;
   min-height: 76px;
@@ -166,54 +174,72 @@ select:focus {
 .pad button {
   font-size: 23px;
   font-weight: 700;
-  background: #f1eff6;
-  color: #3f4962;
+  background: #f6eeea;
+  color: #66534e;
   padding: 15px 8px;
   cursor: pointer;
   transition: background .15s, transform .15s;
 }
 
 .pad button:hover {
-  background: #e8e3f1;
+  background: #eddfd9;
   transform: translateY(-1px);
 }
 
-.pad button:active { transform: scale(.98); }
+.pad button:active {
+  transform: scale(.98);
+}
 
 .submit {
   width: 100%;
   margin-top: 15px;
-  background: #659b89;
+  background: #bd8e83;
   color: white;
   font-weight: 800;
   font-size: 16px;
   padding: 16px;
   cursor: pointer;
-  box-shadow: 0 7px 16px rgba(76,139,118,.18);
+  box-shadow: 0 7px 16px rgba(173,119,106,.19);
   transition: background .15s, transform .15s;
 }
 
 .submit:hover:not(:disabled) {
-  background: #528674;
+  background: #a9776d;
   transform: translateY(-1px);
 }
 
-.submit:disabled { opacity: .55; cursor: wait; }
+.submit:disabled {
+  opacity: .55;
+  cursor: wait;
+}
 
 .status {
   font-size: 12px;
   line-height: 1.5;
   min-height: 22px;
-  color: #85869a;
+  color: #a08e88;
   margin-top: 13px;
   text-align: center;
 }
 
 @media (max-width: 390px) {
-  .card { padding: 17px; border-radius: 19px; }
-  .nav button { padding: 10px 9px; font-size: 13px; }
-  .pad { gap: 7px; }
-  .pad button { padding: 14px 6px; }
+  .card {
+    padding: 17px;
+    border-radius: 19px;
+  }
+
+  .nav button {
+    padding: 10px 9px;
+    font-size: 13px;
+  }
+
+  .pad {
+    gap: 7px;
+  }
+
+  .pad button {
+    padding: 14px 6px;
+  }
 }
 </style>
 </head>
@@ -245,7 +271,7 @@ select:focus {
   <div class="club" id="gymnastClub"></div>
 
   <div class="warning" id="warning" hidden>
-    Выбрано не текущее выступление секретаря.
+    Выбрана не текущая гимнастка.
   </div>
 
   <div class="display" id="display">0</div>
