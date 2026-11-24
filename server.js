@@ -80,118 +80,117 @@ function normalizePerformances(parsed) {
     throw new Error("gymnasts.json должен содержать массив");
   }
 
-  const people = parsed.map((g, index) => {
+  // Важен именно порядок строк в JSON: он повторяет порядок протокола.
+  // Новый блок начинается только тогда, когда меняется надпись «Поток / Время».
+  const blocks = [];
+
+  parsed.forEach((g, index) => {
     const streamText =
       value(g, "Поток / Время", "Поток") ||
       `Поток ${g.Поток || ""}`;
 
-    const streamMatch = streamText.match(
-      /Поток\s*(\d+)/i
-    );
+    const lastBlock = blocks[blocks.length - 1];
 
+    if (!lastBlock || lastBlock.streamText !== streamText) {
+      blocks.push({
+        blockIndex: blocks.length + 1,
+        streamText,
+        people: []
+      });
+    }
+
+    const block = blocks[blocks.length - 1];
+    const streamMatch = streamText.match(/Поток\s*(\d+)/i);
     const streamNumber = Number(
       g.Поток ||
       g.streamNumber ||
       (streamMatch ? streamMatch[1] : 0)
     );
 
-    const streamKey = streamNumber
-      ? `Поток ${streamNumber}`
-      : (streamText.includes("ОФП") ? "ОФП" : streamText);
-
     const timeText =
-      streamText.match(
-        /\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}/
-      )?.[0] ||
+      streamText.match(/\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}/)?.[0] ||
       value(g, "Время потока", "streamTime");
 
-    return {
+    block.people.push({
       sourceId: Number(g.id) || index + 1,
-
-      number:
-        Number(value(g, "Номер в потоке", "number")) ||
-        index + 1,
-
+      number: Number(value(g, "Номер в потоке", "number")) || index + 1,
       streamNumber,
-      stream: streamKey,
       streamText,
       streamTime: timeText,
-      streamOrder: startMinutes(streamText),
-
-      name:
-        value(g, "ФИО Гимнастки", "name") ||
-        "Неизвестная участница",
-
+      name: value(g, "ФИО Гимнастки", "name") || "Неизвестная участница",
       birthYear: value(g, "Год рождения", "birthYear"),
       club: value(g, "Город / Клуб", "club"),
       group: value(g, "Группа / Категория", "group"),
-
-      // Сохраняем пустые места, чтобы номера видов не сдвигались.
       apparatus: [
         value(g, "Вид 1", "apparatus1"),
         value(g, "Вид 2", "apparatus2")
       ]
-    };
+    });
   });
 
   const result = [];
   let nextId = 1;
 
-  const sortedPeople = people.sort(
-    (a, b) =>
-      a.streamOrder - b.streamOrder ||
-      a.number - b.number ||
-      a.sourceId - b.sourceId
-  );
+  for (const block of blocks) {
+    // Один временной блок = одна отдельная последовательность.
+    // Сначала весь первый вид в исходном порядке, затем весь второй.
+    const stages = [
+      { stageIndex: 1, apparatusIndex: 0 },
+      { stageIndex: 2, apparatusIndex: 1 }
+    ];
 
-  for (const p of sortedPeople) {
-    const stages = p.apparatus
-      .map((apparatus, index) => ({
-        apparatus,
-        stageIndex: index + 1
-      }))
-      .filter(stage => stage.apparatus);
+    for (const stage of stages) {
+      for (const p of block.people) {
+        const apparatus = p.apparatus[stage.apparatusIndex];
 
-    const actualStages = stages.length
-      ? stages
-      : [{
-          apparatus: p.stream === "ОФП"
-            ? "ОФП"
-            : "Вид не указан",
-          stageIndex: 1
-        }];
+        // Если у участницы нет второго вида, второй раз её не добавляем.
+        if (!apparatus) continue;
 
-    actualStages.forEach(({ apparatus, stageIndex }) => {
+        result.push({
+          id: nextId++,
+          sourceId: p.sourceId,
+          number: p.number,
+          blockId: block.blockIndex,
+          streamNumber: p.streamNumber,
+          // Включаем время в название группы: одинаковый номер потока
+          // в разных временных блоках больше не объединяется.
+          stream: block.streamText,
+          streamText: block.streamText,
+          streamTime: p.streamTime,
+          name: p.name,
+          birthYear: p.birthYear,
+          club: p.club,
+          group: p.group,
+          apparatus,
+          stageIndex: stage.stageIndex,
+          stageCount: p.apparatus.filter(Boolean).length || 1
+        });
+      }
+    }
+
+    // ОФП и иные записи без «Вид 1/Вид 2» — одно выступление на участницу.
+    for (const p of block.people) {
+      if (p.apparatus.some(Boolean)) continue;
+
       result.push({
         id: nextId++,
         sourceId: p.sourceId,
         number: p.number,
-
+        blockId: block.blockIndex,
         streamNumber: p.streamNumber,
-        stream: p.stream,
-        streamText: p.streamText,
+        stream: block.streamText,
+        streamText: block.streamText,
         streamTime: p.streamTime,
-        streamOrder: p.streamOrder,
-
         name: p.name,
         birthYear: p.birthYear,
         club: p.club,
         group: p.group,
-
-        apparatus,
-        stageIndex,
-        stageCount: actualStages.length
+        apparatus: p.group.includes("ОФП") ? "ОФП" : "Вид не указан",
+        stageIndex: 1,
+        stageCount: 1
       });
-    });
+    }
   }
-
-  result.sort(
-    (a, b) =>
-      a.streamOrder - b.streamOrder ||
-      a.stageIndex - b.stageIndex ||
-      a.number - b.number ||
-      a.sourceId - b.sourceId
-  );
 
   return result;
 }
